@@ -19,6 +19,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Supprimer complètement les logs d'erreur asyncio non critiques
+logging.getLogger('asyncio').setLevel(logging.CRITICAL)
+
+# Supprimer les avertissements pour les exceptions de tâches asyncio non récupérées
+import warnings
+warnings.filterwarnings('ignore', category=RuntimeWarning)
+
 # Charger les variables d'environnement
 load_dotenv()
 
@@ -149,10 +156,11 @@ if __name__ == "__main__":
     import uvicorn
     
     # Démarrer le serveur
+    # reload=False pour éviter les erreurs de rechargement automatique
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,
+        reload=False,  # Désactivé pour plus de stabilité
         log_level="info"
     )

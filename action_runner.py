@@ -6,9 +6,7 @@ import logging
 from datetime import datetime
 
 from models import ActionResult
-from actions.google_calendar import get_calendar_manager
 from actions.notion import get_notion_manager
-from actions.google_tasks import get_google_tasks_manager
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +16,7 @@ class ActionRunner:
     
     def __init__(self, demo_mode: bool = True):
         self.demo_mode = demo_mode
-        self.calendar_manager = get_calendar_manager(demo_mode)
         self.notion_manager = get_notion_manager(demo_mode)
-        self.tasks_manager = get_google_tasks_manager(demo_mode)
     
     async def execute_tasks(self, tasks_json: Dict[str, Any]) -> List[ActionResult]:
         """
@@ -67,13 +63,9 @@ class ActionRunner:
         action = task.get("action")
         app = task.get("app")
         
-        # Router vers le bon gestionnaire
-        if app == "google_calendar":
-            return await self._handle_calendar_action(action, task)
-        elif app == "notion":
+        # Router vers le bon gestionnaire - Tout utilise Notion maintenant
+        if app in ["notion", "notion_calendar", "calendar", "tasks"]:
             return await self._handle_notion_action(action, task)
-        elif app == "google_tasks":
-            return await self._handle_google_tasks_action(action, task)
         else:
             return ActionResult(
                 action=action,
@@ -82,52 +74,10 @@ class ActionRunner:
                 message=f"Application inconnue: {app}"
             )
     
-    async def _handle_calendar_action(self, action: str, task: Dict[str, Any]) -> ActionResult:
-        """Gère les actions Google Calendar"""
-        try:
-            if action == "create_event":
-                result = await self.calendar_manager.create_event(
-                    title=task.get("title"),
-                    date=task.get("date"),
-                    time=task.get("time"),
-                    duration_minutes=task.get("duration_minutes", 60),
-                    description=task.get("description"),
-                    location=task.get("location")
-                )
-            elif action == "update_event":
-                result = await self.calendar_manager.update_event(
-                    event_id=task.get("event_id"),
-                    **task
-                )
-            elif action == "delete_event":
-                result = await self.calendar_manager.delete_event(
-                    event_id=task.get("event_id")
-                )
-            else:
-                result = {
-                    "status": "error",
-                    "message": f"Action inconnue: {action}"
-                }
-            
-            return ActionResult(
-                action=action,
-                app="google_calendar",
-                status=result.get("status"),
-                message=result.get("message"),
-                details=result
-            )
-            
-        except Exception as e:
-            logger.error(f"Calendar action error: {e}")
-            return ActionResult(
-                action=action,
-                app="google_calendar",
-                status="error",
-                message=f"Erreur: {str(e)}"
-            )
+
     
     async def _handle_notion_action(self, action: str, task: Dict[str, Any]) -> ActionResult:
-        """Gère les actions Notion"""
+        """Gère toutes les actions Notion (pages, tâches, événements)"""
         try:
             if action == "create_page":
                 result = await self.notion_manager.create_page(
@@ -141,6 +91,17 @@ class ActionRunner:
                     due_date=task.get("due_date"),
                     priority=task.get("priority", "medium"),
                     description=task.get("description")
+                )
+            elif action == "create_event":
+                # Créer un événement comme une tâche avec date/heure
+                title = task.get("title")
+                date = task.get("date")
+                time = task.get("time")
+                result = await self.notion_manager.create_task(
+                    title=f"📅 {title}",
+                    due_date=date,
+                    priority="medium",
+                    description=f"Événement le {date} à {time}\n{task.get('description', '')}"
                 )
             else:
                 result = {
@@ -165,37 +126,7 @@ class ActionRunner:
                 message=f"Erreur: {str(e)}"
             )
     
-    async def _handle_google_tasks_action(self, action: str, task: Dict[str, Any]) -> ActionResult:
-        """Gère les actions Google Tasks"""
-        try:
-            if action == "create_task":
-                result = await self.tasks_manager.create_task(
-                    title=task.get("title"),
-                    due_date=task.get("due_date"),
-                    notes=task.get("notes")
-                )
-            else:
-                result = {
-                    "status": "error",
-                    "message": f"Action inconnue: {action}"
-                }
-            
-            return ActionResult(
-                action=action,
-                app="google_tasks",
-                status=result.get("status"),
-                message=result.get("message"),
-                details=result
-            )
-            
-        except Exception as e:
-            logger.error(f"Google Tasks action error: {e}")
-            return ActionResult(
-                action=action,
-                app="google_tasks",
-                status="error",
-                message=f"Erreur: {str(e)}"
-            )
+
 
 
 # Instance globale

@@ -17,6 +17,7 @@ class NotionManager:
         self.api_key = os.getenv("NOTION_API_KEY")
         self.database_id = os.getenv("NOTION_DATABASE_ID")
         self.client = None
+        self._client_initialized = False
         
         if not demo_mode:
             self._initialize_client()
@@ -33,12 +34,33 @@ class NotionManager:
                 return
             
             self.client = AsyncClient(auth=self.api_key)
+            self._client_initialized = True
             logger.info("Notion client initialized")
             
         except Exception as e:
             logger.error(f"Error initializing Notion client: {e}")
             logger.info("Falling back to demo mode")
             self.demo_mode = True
+    
+    async def __aenter__(self):
+        """Context manager entry"""
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit - cleanup"""
+        await self.close()
+    
+    async def close(self):
+        """Close the Notion client properly"""
+        if self.client and self._client_initialized:
+            try:
+                await self.client.aclose()
+                logger.debug("Notion client closed")
+            except Exception as e:
+                # Ignore errors during cleanup
+                logger.debug(f"Error closing Notion client: {e}")
+            finally:
+                self._client_initialized = False
     
     async def create_page(
         self,
@@ -180,8 +202,8 @@ class NotionManager:
                         ]
                     },
                     "Status": {
-                        "select": {
-                            "name": "À faire"
+                        "status": {
+                            "name": "Not started"
                         }
                     }
                 }
@@ -197,14 +219,14 @@ class NotionManager:
             
             # Ajouter la priorité
             priority_map = {
-                "low": "Basse",
-                "medium": "Moyenne",
-                "high": "Haute"
+                "low": "Low",
+                "medium": "Medium",
+                "high": "High"
             }
             
             new_task["properties"]["Priority"] = {
-                "select": {
-                    "name": priority_map.get(priority, "Moyenne")
+                "status": {
+                    "name": priority_map.get(priority, "Medium")
                 }
             }
             

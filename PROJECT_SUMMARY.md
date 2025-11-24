@@ -457,14 +457,3 @@ streamlit run ui/app.py
 5. **Interface Moderne** - Streamlit avec design soigné
 6. **Tests Inclus** - Suite de tests complète
 7. **Déploiement Simple** - Guide de déploiement complet
-
----
-
-**🎓 Parfait pour une démonstration de 4 jours !**
-
-**🚀 Bon développement et bonne présentation !**
-
----
-
-*Projet créé le 22 novembre 2025*
-*Assistant Étudiant Automatisé v1.0*

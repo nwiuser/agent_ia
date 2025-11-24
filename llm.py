@@ -40,37 +40,45 @@ class LLMParser:
     
     def _mock_parse(self, query: str) -> Dict[str, Any]:
         """
-        Mode mock pour démo - analyse basique des mots-clés
+        Mode mock pour démo - analyse basique des mots-clés avec priorités
         """
         logger.info(f"Mock parsing query: {query}")
         query_lower = query.lower()
         tasks = []
         
-        # Détection d'événements Google Calendar
-        if any(word in query_lower for word in ["examen", "cours", "rdv", "rendez-vous", "réunion", "meeting"]):
+        # Détection par ordre de priorité (une seule action principale)
+        
+        # 1. Priorité haute : Événements (avec date/heure)
+        if any(word in query_lower for word in ["examen", "cours", "rdv", "rendez-vous", "réunion", "meeting", "événement", "event"]):
             event_task = self._extract_event(query)
             if event_task:
                 tasks.append(event_task)
+                return {"tasks": tasks}  # Retourner directement
         
-        # Détection de pages Notion
-        if any(word in query_lower for word in ["page", "note", "document", "notion"]):
+        # 2. Priorité moyenne : Tâches explicites
+        if any(word in query_lower for word in ["tâche", "tache", "todo", "à faire", "a faire", "task", "ajoute", "crée une"]):
+            # Vérifier que ce n'est pas une demande de page
+            if not any(word in query_lower for word in ["page", "document"]):
+                task_item = self._extract_notion_task(query)
+                if task_item:
+                    tasks.append(task_item)
+                    return {"tasks": tasks}  # Retourner directement
+        
+        # 3. Priorité basse : Pages Notion
+        if any(word in query_lower for word in ["page", "note", "document"]):
             page_task = self._extract_notion_page(query)
             if page_task:
                 tasks.append(page_task)
+                return {"tasks": tasks}  # Retourner directement
         
-        # Détection de tâches
-        if any(word in query_lower for word in ["tâche", "tache", "todo", "à faire", "a faire", "task"]):
-            task_item = self._extract_notion_task(query)
-            if task_item:
-                tasks.append(task_item)
-        
-        # Si aucune action détectée, créer une action par défaut
+        # 4. Par défaut : Créer une tâche simple
         if not tasks:
             tasks.append({
-                "action": "create_page",
+                "action": "create_task",
                 "app": "notion",
-                "title": f"Note: {query[:50]}",
-                "content": query
+                "title": query[:100],
+                "priority": "medium",
+                "description": query
             })
         
         return {"tasks": tasks}
@@ -97,7 +105,7 @@ class LLMParser:
         
         return {
             "action": "create_event",
-            "app": "google_calendar",
+            "app": "notion",
             "title": title,
             "date": date_str,
             "time": time_str,
