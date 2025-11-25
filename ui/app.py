@@ -1,6 +1,3 @@
-"""
-Interface utilisateur Streamlit - Assistant Étudiant IA
-"""
 import streamlit as st
 import requests
 import json
@@ -58,22 +55,6 @@ with col1:
     
     if clear_btn:
         st.rerun()
-
-with col2:
-    st.subheader("ℹ️ Informations")
-    st.info("""
-    **Actions disponibles :**
-    
-    📅 **Google Calendar**
-    - Créer des événements
-    - Planifier des examens
-    - Ajouter des cours
-    
-    📝 **Notion**
-    - Créer des pages
-    - Ajouter des tâches
-    - Organiser les révisions
-    """)
 
 st.divider()
 
@@ -161,21 +142,6 @@ if (execute_btn or parse_only_btn) and not user_query:
 
 # Sidebar avec des exemples
 with st.sidebar:
-    st.header("💡 Exemples de requêtes")
-    
-    example_queries = [
-        "Ajoute un examen de maths mardi à 10h et crée une page Notion pour réviser",
-        "Crée un événement pour mon cours de physique demain à 14h30 durant 2 heures",
-        "Planifie une réunion de groupe jeudi à 16h",
-        "Ajoute une tâche pour rendre le projet vendredi avec haute priorité",
-        "Crée une page Notion pour mes notes de cours",
-        "Ajoute un événement examen final lundi prochain à 9h"
-    ]
-    
-    for i, example in enumerate(example_queries, 1):
-        if st.button(f"Exemple {i}", key=f"example_{i}", use_container_width=True):
-            st.session_state.query_input = example
-            st.rerun()
     
     st.divider()
     
@@ -204,6 +170,3 @@ with st.sidebar:
     """)
     
     st.divider()
-    
-    st.caption("🎓 Assistant Étudiant IA v1.0")
-    st.caption("Projet de démonstration - 4 jours")
