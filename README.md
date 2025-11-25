@@ -71,11 +71,8 @@ cp .env.example .env
 Éditez le fichier `.env` :
 
 ```env
-# Mode démo (True = utilise des mocks, False = utilise les vraies APIs)
-DEMO_MODE=True
-
-# OpenAI API (optionnel en mode démo)
-OPENAI_API_KEY=your_openai_api_key_here
+META_API_KEY=your-meta-api-key-from-openrouter-here
+META_MODEL=meta-llama/llama-3.1-8b-instruct
 
 # Notion API (obligatoire en mode production)
 NOTION_API_KEY=your_notion_api_key_here
@@ -203,7 +200,7 @@ Vérifie l'état de l'API
 ### `GET /docs`
 Documentation interactive Swagger
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────┐
@@ -264,7 +261,7 @@ response = requests.post(
 print(response.json())
 ```
 
-## 📝 Logs
+## Logs
 
 Les logs sont affichés dans la console et incluent :
 - Requêtes reçues
@@ -272,7 +269,7 @@ Les logs sont affichés dans la console et incluent :
 - Exécution des actions
 - Erreurs éventuelles
 
-## 🐛 Dépannage
+## Dépannage
 
 ### Erreur "API non disponible"
 - Vérifiez que le backend est lancé : `python main.py`
@@ -291,44 +288,22 @@ pip install --upgrade pip
 pip install -r requirements.txt --force-reinstall
 ```
 
-## 🎯 Fonctionnalités
+## Fonctionnalités
 
-✅ Parsing de langage naturel (mode mock + OpenAI)  
+✅ Parsing de langage naturel
 ✅ Création d'événements dans Notion (avec date/heure)  
 ✅ Création de pages Notion  
 ✅ Création de tâches Notion avec priorités  
 ✅ Interface web intuitive  
 ✅ API REST documentée  
-✅ Mode démo sans configuration  
 ✅ Logs détaillés  
 ✅ Gestion d'erreurs robuste  
 ✅ **Tout centralisé dans Notion** - Plus de configuration OAuth complexe !
 
-## 🚀 Prochaines Étapes
-
-- [ ] Intégration avec Notion Calendar (API officielle)
-- [ ] Gestion des récurrences d'événements
-- [ ] Export des résultats en PDF
-- [ ] Interface mobile
-- [ ] Support multi-utilisateurs
-- [ ] Historique des requêtes
-- [ ] Notifications push
-
-## 📄 Licence
+## Licence
 
 Ce projet est un projet de démonstration éducatif.
 
 ## 👨‍💻 Auteur
 
-Projet créé pour une démonstration de 4 jours - Assistant IA pour étudiants
-
-## 🙏 Remerciements
-
-- FastAPI pour le framework web
-- Streamlit pour l'interface utilisateur
-- OpenAI pour les capacités LLM
-- Notion pour son API puissante et simple
-
----
-
-**Bon développement ! 🚀**
+Projet créé par @nwiuser
