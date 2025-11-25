@@ -1,6 +1,6 @@
 # 🎓 Assistant Étudiant Automatisé
 
-Un système d'agent IA qui transforme des instructions en langage naturel en actions concrètes sur Google Calendar et Notion.
+Un système d'agent IA qui transforme des instructions en langage naturel en actions concrètes sur Notion.
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green.svg)
@@ -14,9 +14,10 @@ Permettre à un étudiant de taper une instruction simple comme :
 Et l'agent IA :
 1. 🧠 Analyse la requête via un LLM
 2. 📋 Transforme la requête en JSON structuré
-3. ⚡ Exécute automatiquement les actions :
-   - Créer un événement dans Google Calendar
-   - Créer une page ou tâche dans Notion
+3. ⚡ Exécute automatiquement les actions dans Notion :
+   - Créer un événement (tâche avec date/heure)
+   - Créer une page de notes
+   - Créer une tâche
 4. ✅ Retourne le résultat
 
 ## 📦 Structure du Projet
@@ -29,13 +30,13 @@ tp_agent_ai/
 ├── models.py              # Modèles Pydantic
 ├── actions/
 │   ├── __init__.py
-│   ├── google_calendar.py # Gestion Google Calendar
-│   ├── notion.py          # Gestion Notion
-│   └── google_tasks.py    # Gestion Google Tasks (optionnel)
+│   └── notion.py          # Gestion Notion (pages, tâches, événements)
 ├── ui/
 │   └── app.py             # Interface Streamlit
 ├── requirements.txt       # Dépendances Python
 ├── .env.example          # Template des variables d'environnement
+├── MIGRATION_NOTION.md   # Guide de migration
+├── GUIDE_NOTION.md       # Guide d'intégration Notion
 ├── .gitignore
 └── README.md
 ```
@@ -77,24 +78,12 @@ DEMO_MODE=True
 # OpenAI API (optionnel en mode démo)
 OPENAI_API_KEY=your_openai_api_key_here
 
-# Google Calendar (optionnel en mode démo)
-GOOGLE_CALENDAR_CREDENTIALS_FILE=credentials.json
-GOOGLE_CALENDAR_TOKEN_FILE=token.json
-
-# Notion (optionnel en mode démo)
+# Notion API (obligatoire en mode production)
 NOTION_API_KEY=your_notion_api_key_here
 NOTION_DATABASE_ID=your_notion_database_id_here
 ```
 
-## 🔑 Configuration des APIs (Optionnel - Mode Production)
-
-### Google Calendar API
-
-1. Aller sur [Google Cloud Console](https://console.cloud.google.com/)
-2. Créer un nouveau projet
-3. Activer l'API Google Calendar
-4. Créer des identifiants OAuth 2.0
-5. Télécharger le fichier `credentials.json` à la racine du projet
+## 🔑 Configuration de Notion (Optionnel - Mode Production)
 
 ### Notion API
 
@@ -242,12 +231,12 @@ Documentation interactive Swagger
 │Parser │ │   Runner   │
 └───────┘ └─────┬──────┘
                 │
-         ┌──────┴──────┐
-         ▼             ▼
-   ┌──────────┐  ┌─────────┐
-   │ Google   │  │ Notion  │
-   │ Calendar │  │   API   │
-   └──────────┘  └─────────┘
+                ▼
+          ┌─────────┐
+          │ Notion  │
+          │   API   │
+          └─────────┘
+    (Pages, Tâches, Événements)
 ```
 
 ## 🧪 Tests Rapides
@@ -307,23 +296,25 @@ pip install -r requirements.txt --force-reinstall
 ## 🎯 Fonctionnalités
 
 ✅ Parsing de langage naturel (mode mock + OpenAI)  
-✅ Création d'événements Google Calendar  
+✅ Création d'événements dans Notion (avec date/heure)  
 ✅ Création de pages Notion  
-✅ Création de tâches Notion  
+✅ Création de tâches Notion avec priorités  
 ✅ Interface web intuitive  
 ✅ API REST documentée  
 ✅ Mode démo sans configuration  
 ✅ Logs détaillés  
 ✅ Gestion d'erreurs robuste  
+✅ **Tout centralisé dans Notion** - Plus de configuration OAuth complexe !
 
 ## 🚀 Prochaines Étapes
 
-- [ ] Support de Google Tasks
+- [ ] Intégration avec Notion Calendar (API officielle)
 - [ ] Gestion des récurrences d'événements
 - [ ] Export des résultats en PDF
 - [ ] Interface mobile
 - [ ] Support multi-utilisateurs
 - [ ] Historique des requêtes
+- [ ] Notifications push
 
 ## 📄 Licence
 
@@ -338,7 +329,7 @@ Projet créé pour une démonstration de 4 jours - Assistant IA pour étudiants
 - FastAPI pour le framework web
 - Streamlit pour l'interface utilisateur
 - OpenAI pour les capacités LLM
-- Google et Notion pour leurs APIs
+- Notion pour son API puissante et simple
 
 ---
 

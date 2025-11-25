@@ -1,7 +1,3 @@
-"""
-Module LLM - Conversion des requêtes en langage naturel vers JSON structuré
-Supporte OpenAI et un mode mock pour la démonstration
-"""
 import os
 import json
 import re
