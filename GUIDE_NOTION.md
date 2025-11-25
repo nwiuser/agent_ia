@@ -37,7 +37,6 @@ python test_notion.py
 "Ajoute une tâche urgente pour le projet de physique"
 "Planifie une tâche avec priorité haute pour vendredi"
 ```
-
 ---
 
 ## 🔧 Option 2 : Mode Production (API Réelle)
