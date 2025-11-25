@@ -35,7 +35,6 @@ tp_agent_ai/
 │   └── app.py             # Interface Streamlit
 ├── requirements.txt       # Dépendances Python
 ├── .env.example          # Template des variables d'environnement
-├── MIGRATION_NOTION.md   # Guide de migration
 ├── GUIDE_NOTION.md       # Guide d'intégration Notion
 ├── .gitignore
 └── README.md
@@ -83,7 +82,7 @@ NOTION_API_KEY=your_notion_api_key_here
 NOTION_DATABASE_ID=your_notion_database_id_here
 ```
 
-## 🔑 Configuration de Notion (Optionnel - Mode Production)
+## Configuration de Notion (Optionnel - Mode Production)
 
 ### Notion API
 
@@ -93,13 +92,7 @@ NOTION_DATABASE_ID=your_notion_database_id_here
 4. Créer une base de données Notion et partager avec votre intégration
 5. Copier l'ID de la base de données
 
-### OpenAI API
-
-1. Aller sur [OpenAI Platform](https://platform.openai.com/)
-2. Créer une clé API
-3. Ajouter la clé dans le fichier `.env`
-
-## 🎮 Utilisation
+## Utilisation
 
 ### Mode Démo (Recommandé pour tester)
 
@@ -224,19 +217,24 @@ Documentation interactive Swagger
 │   (main.py)     │
 └────────┬────────┘
          │
-    ┌────┴────┐
-    ▼         ▼
-┌───────┐ ┌────────────┐
-│  LLM  │ │   Action   │
-│Parser │ │   Runner   │
-└───────┘ └─────┬──────┘
-                │
-                ▼
-          ┌─────────┐
-          │ Notion  │
-          │   API   │
-          └─────────┘
-    (Pages, Tâches, Événements)
+         ▼
+     ┌───────┐
+     │  LLM  │
+     │Parser │
+     └───┬───┘
+         |
+         ▼
+   ┌────────────┐
+   │   Action   │
+   │   Runner   │
+   └─────┬──────┘
+         │
+         ▼
+    ┌─────────┐
+    │ Notion  │
+    │   API   │
+    └─────────┘
+(Pages, Tâches, Événements ...)
 ```
 
 ## 🧪 Tests Rapides
