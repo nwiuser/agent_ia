@@ -1,6 +1,3 @@
-"""
-Module Notion - Gestion des pages et tâches
-"""
 import os
 from typing import Dict, Any, Optional
 from datetime import datetime
