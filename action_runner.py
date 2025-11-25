@@ -1,6 +1,3 @@
-"""
-Module Action Runner - Exécute les actions parsées par le LLM
-"""
 from typing import Dict, Any, List
 import logging
 from datetime import datetime
@@ -14,9 +11,8 @@ logger = logging.getLogger(__name__)
 class ActionRunner:
     """Exécute les actions définies dans le JSON"""
     
-    def __init__(self, demo_mode: bool = True):
-        self.demo_mode = demo_mode
-        self.notion_manager = get_notion_manager(demo_mode)
+    def __init__(self):
+        self.notion_manager = get_notion_manager()
     
     async def execute_tasks(self, tasks_json: Dict[str, Any]) -> List[ActionResult]:
         """
@@ -96,10 +92,14 @@ class ActionRunner:
                 # Créer un événement comme une tâche avec date/heure
                 title = task.get("title")
                 date = task.get("date")
-                time = task.get("time")
+                time = task.get("time", "00:00")
+                
+                # Combiner date et heure au format ISO
+                datetime_str = f"{date}T{time}:00"
+                
                 result = await self.notion_manager.create_task(
                     title=f"📅 {title}",
-                    due_date=date,
+                    due_date=datetime_str,
                     priority="medium",
                     description=f"Événement le {date} à {time}\n{task.get('description', '')}"
                 )
@@ -133,15 +133,11 @@ class ActionRunner:
 _action_runner = None
 
 
-def get_action_runner(demo_mode: bool = None) -> ActionRunner:
+def get_action_runner() -> ActionRunner:
     """Récupère ou crée l'instance de l'action runner"""
     global _action_runner
     
-    import os
-    if demo_mode is None:
-        demo_mode = os.getenv("DEMO_MODE", "True").lower() == "true"
-    
     if _action_runner is None:
-        _action_runner = ActionRunner(demo_mode=demo_mode)
+        _action_runner = ActionRunner()
     
     return _action_runner

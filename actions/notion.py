@@ -12,15 +12,13 @@ logger = logging.getLogger(__name__)
 class NotionManager:
     """Gestionnaire pour Notion API"""
     
-    def __init__(self, demo_mode: bool = True):
-        self.demo_mode = demo_mode
+    def __init__(self):
         self.api_key = os.getenv("NOTION_API_KEY")
         self.database_id = os.getenv("NOTION_DATABASE_ID")
         self.client = None
         self._client_initialized = False
         
-        if not demo_mode:
-            self._initialize_client()
+        self._initialize_client()
     
     def _initialize_client(self):
         """Initialize Notion client"""
@@ -28,10 +26,7 @@ class NotionManager:
             from notion_client import AsyncClient
             
             if not self.api_key:
-                logger.error("NOTION_API_KEY not found in environment")
-                logger.info("Falling back to demo mode")
-                self.demo_mode = True
-                return
+                raise ValueError("NOTION_API_KEY not found in environment")
             
             self.client = AsyncClient(auth=self.api_key)
             self._client_initialized = True
@@ -39,8 +34,7 @@ class NotionManager:
             
         except Exception as e:
             logger.error(f"Error initializing Notion client: {e}")
-            logger.info("Falling back to demo mode")
-            self.demo_mode = True
+            raise
     
     async def __aenter__(self):
         """Context manager entry"""
@@ -62,6 +56,7 @@ class NotionManager:
             finally:
                 self._client_initialized = False
     
+  
     async def create_page(
         self,
         title: str,
@@ -79,9 +74,6 @@ class NotionManager:
         Returns:
             Dict avec le statut et les détails
         """
-        if self.demo_mode:
-            return self._mock_create_page(title, content)
-        
         try:
             db_id = database_id or self.database_id
             
@@ -144,21 +136,6 @@ class NotionManager:
                 "message": f"Erreur lors de la création de la page: {str(e)}"
             }
     
-    def _mock_create_page(self, title: str, content: Optional[str]) -> Dict[str, Any]:
-        """Version mock pour la démonstration"""
-        logger.info(f"[MOCK] Creating Notion page: {title}")
-        
-        return {
-            "status": "mock",
-            "message": f"✅ [DEMO] Page Notion '{title}' créée",
-            "page_id": f"mock_page_{datetime.now().timestamp()}",
-            "page_url": "https://www.notion.so/",
-            "details": {
-                "title": title,
-                "content": content or "Pas de contenu"
-            }
-        }
-    
     async def create_task(
         self,
         title: str,
@@ -178,9 +155,6 @@ class NotionManager:
         Returns:
             Dict avec le statut et les détails
         """
-        if self.demo_mode:
-            return self._mock_create_task(title, due_date, priority, description)
-        
         try:
             if not self.database_id:
                 return {
@@ -188,69 +162,42 @@ class NotionManager:
                     "message": "Database ID not configured for tasks"
                 }
             
-            # Créer la tâche
+            # Structure de base de la tâche
             new_task = {
                 "parent": {"database_id": self.database_id},
                 "properties": {
                     "Name": {
-                        "title": [
-                            {
-                                "text": {
-                                    "content": title
-                                }
-                            }
-                        ]
-                    },
-                    "Status": {
-                        "status": {
-                            "name": "Not started"
-                        }
+                        "title": [{"text": {"content": title}}]
                     }
                 }
             }
             
-            # Ajouter la date d'échéance si présente
+            # Ajouter date si présente
             if due_date:
-                new_task["properties"]["Due Date"] = {
-                    "date": {
-                        "start": due_date
-                    }
-                }
+                new_task["properties"]["Due Date"] = {"date": {"start": due_date}}
             
-            # Ajouter la priorité
-            priority_map = {
-                "low": "Low",
-                "medium": "Medium",
-                "high": "High"
-            }
+            # Ajouter statut par défaut
+            new_task["properties"]["Status"] = {"select": {"name": "Not started"}}
             
+            # Ajouter priorité
+            priority_values = {"low": "Low", "medium": "Medium", "high": "High"}
             new_task["properties"]["Priority"] = {
-                "status": {
-                    "name": priority_map.get(priority, "Medium")
-                }
+                "select": {"name": priority_values.get(priority.lower(), "Medium")}
             }
             
-            # Ajouter la description si présente
+            # Ajouter description si présente
             if description:
                 new_task["children"] = [
                     {
                         "object": "block",
                         "type": "paragraph",
                         "paragraph": {
-                            "rich_text": [
-                                {
-                                    "type": "text",
-                                    "text": {
-                                        "content": description
-                                    }
-                                }
-                            ]
+                            "rich_text": [{"type": "text", "text": {"content": description}}]
                         }
                     }
                 ]
             
             response = await self.client.pages.create(**new_task)
-            
             logger.info(f"Task created: {response.get('url')}")
             
             return {
@@ -266,49 +213,20 @@ class NotionManager:
                 "status": "error",
                 "message": f"Erreur lors de la création de la tâche: {str(e)}"
             }
-    
-    def _mock_create_task(
-        self,
-        title: str,
-        due_date: Optional[str],
-        priority: str,
-        description: Optional[str]
-    ) -> Dict[str, Any]:
-        """Version mock pour la démonstration"""
-        logger.info(f"[MOCK] Creating Notion task: {title}")
-        
-        priority_emoji = {
-            "low": "🟢",
-            "medium": "🟡",
-            "high": "🔴"
-        }
-        
-        return {
-            "status": "mock",
-            "message": f"✅ [DEMO] Tâche Notion '{title}' créée",
-            "task_id": f"mock_task_{datetime.now().timestamp()}",
-            "task_url": "https://www.notion.so/",
-            "details": {
-                "title": title,
-                "due_date": due_date or "Pas de date",
-                "priority": f"{priority_emoji.get(priority, '🟡')} {priority}",
-                "description": description or "Pas de description"
-            }
-        }
 
 
 # Instance globale
 _notion_manager = None
 
 
-def get_notion_manager(demo_mode: bool = None) -> NotionManager:
+def get_notion_manager() -> NotionManager:
     """Récupère ou crée l'instance du gestionnaire Notion"""
     global _notion_manager
     
-    if demo_mode is None:
-        demo_mode = os.getenv("DEMO_MODE", "True").lower() == "true"
+    # Force refresh pour éviter le cache
+    _notion_manager = None
     
     if _notion_manager is None:
-        _notion_manager = NotionManager(demo_mode=demo_mode)
+        _notion_manager = NotionManager()
     
     return _notion_manager
