@@ -1,6 +1,3 @@
-"""
-Modèles Pydantic pour définir les structures de données utilisées par l'agent
-"""
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 from datetime import datetime
@@ -18,18 +15,6 @@ class Action(BaseModel):
     app: Literal["google_calendar", "notion", "google_tasks"] = Field(
         ..., description="Application cible"
     )
-
-
-class GoogleCalendarAction(Action):
-    """Action pour Google Calendar"""
-    app: Literal["google_calendar"] = "google_calendar"
-    title: str = Field(..., description="Titre de l'événement")
-    date: str = Field(..., description="Date au format YYYY-MM-DD")
-    time: str = Field(..., description="Heure au format HH:MM")
-    duration_minutes: Optional[int] = Field(60, description="Durée en minutes")
-    description: Optional[str] = Field(None, description="Description de l'événement")
-    location: Optional[str] = Field(None, description="Lieu de l'événement")
-
 
 class NotionPageAction(Action):
     """Action pour créer une page Notion"""

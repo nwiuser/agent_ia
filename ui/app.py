@@ -169,4 +169,3 @@ with st.sidebar:
     ```
     """)
     
-    st.divider()

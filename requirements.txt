@@ -5,13 +5,13 @@ pydantic==2.5.3
 python-dotenv==1.0.0
 
 # LLM
-openai>=1.0.0
+# openai>=1.0.0
 
-# Google APIs
-google-auth==2.27.0
-google-auth-oauthlib==1.2.0
-google-auth-httplib2==0.2.0
-google-api-python-client==2.116.0
+# # Google APIs
+# google-auth==2.27.0
+# google-auth-oauthlib==1.2.0
+# google-auth-httplib2==0.2.0
+# google-api-python-client==2.116.0
 
 # Notion
 notion-client==2.2.1
